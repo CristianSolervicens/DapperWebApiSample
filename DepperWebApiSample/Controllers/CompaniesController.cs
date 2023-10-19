@@ -64,12 +64,12 @@ namespace DepperWebApiSample.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCompany(int id, Company company)
+        [HttpPut]
+        public async Task<IActionResult> UpdateCompany(Company company)
         {
             try
             {
-                var dbCompany = await _companyRepo.GetCompany(id);
+                var dbCompany = await _companyRepo.GetCompany(company.Id);
                 if (dbCompany == null)
                     return NotFound();
 

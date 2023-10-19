@@ -1,6 +1,8 @@
 using DapperConsoleSample.Context;
 using DapperConsoleSample.Contracts;
 using DapperConsoleSample.Repository;
+using DepperWebApiSample.Contracts;
+using DepperWebApiSample.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddControllers();
 
 var app = builder.Build();

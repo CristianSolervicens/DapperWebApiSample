@@ -44,7 +44,7 @@ namespace DapperConsoleSample.Repository
         public async Task<Company> CreateCompany(Company company)
         {
             var query = "INSERT INTO Companies (Name, Address, Country) VALUES (@Name, @Address, @Country)" +
-                "SELECT CAST(SCOPE_IDENTITY() as int)";
+                "SELECT Id = CAST(SCOPE_IDENTITY() as int)";
 
             var parameters = new DynamicParameters();
             parameters.Add("Name", company.Name, DbType.String);
