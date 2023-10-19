@@ -43,8 +43,8 @@ namespace DapperConsoleSample.Repository
 
         public async Task<Company> CreateCompany(Company company)
         {
-            var query = "INSERT INTO Companies (Name, Address, Country) VALUES (@Name, @Address, @Country)" +
-                "SELECT Id = CAST(SCOPE_IDENTITY() as int)";
+            var query = @"INSERT INTO Companies (Name, Address, Country) VALUES (@Name, @Address, @Country);
+                SELECT CAST(SCOPE_IDENTITY() as int);";
 
             var parameters = new DynamicParameters();
             parameters.Add("Name", company.Name, DbType.String);
@@ -54,7 +54,7 @@ namespace DapperConsoleSample.Repository
             using (var connection = _context.CreateConnection())
             {
                 var id = await connection.QuerySingleAsync<int>(query, parameters);
-
+                
                 var createdCompany = new Company
                 {
                     Id = id,
@@ -63,7 +63,7 @@ namespace DapperConsoleSample.Repository
                     Country = company.Country
                 };
 
-                return company;
+                return createdCompany;
             }
         }
 
