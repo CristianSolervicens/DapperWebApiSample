@@ -1,11 +1,10 @@
 ﻿
-using DapperConsoleSample.Contracts;
-using DapperConsoleSample.Entities;
-using DepperWebApiSample.Contracts;
+using DapperWebApiSample.Entities;
+using DapperWebApiSample.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace DepperWebApiSample.Controllers
+namespace DapperWebApiSample.Controllers
 {
 
     [Route("api/employees")]
@@ -19,8 +18,12 @@ namespace DepperWebApiSample.Controllers
             _employeeRepo = employeeRepo;
         }
 
-
+        /// <summary>
+        /// Lsita de todos los Empleados, independiente de la Empresa
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
+        [HttpHead]
         public async Task<IActionResult> GetEmployees()
         {
             try

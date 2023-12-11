@@ -1,4 +1,4 @@
-﻿using DapperConsoleSample.Entities;
+﻿using DapperWebApiSample.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ namespace DapperConsoleSample.Contracts
         public Task UpdateCompany(Company company);
         public Task DeleteCompany(int id);
         public Task<Company> GetCompanyByEmployeeId(int id);
+
         public Task<Company> GetCompanyEmployeesMultipleResults(int id);
         public Task<List<Company>> GetCompaniesEmployeesMultipleMapping();
     }

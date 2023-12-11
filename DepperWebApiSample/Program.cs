@@ -1,8 +1,8 @@
 using DapperConsoleSample.Context;
 using DapperConsoleSample.Contracts;
-using DapperConsoleSample.Repository;
-using DepperWebApiSample.Contracts;
-using DepperWebApiSample.Repository;
+using DapperWebApiSample.Contracts;
+using DapperWebApiSample.Repository;
+using DepperConsoleSample.Repository;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
@@ -40,7 +40,23 @@ builder.Services.AddSwaggerGen(setupAction =>
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddControllers();
+
+////Controlar "media type", (sólo aceptará json, si se pide application/xml dará 406 not acceptable)
+//builder.Services.AddControllers(configure =>
+//        {
+//            configure.ReturnHttpNotAcceptable = true;
+//        }
+//    );
+
+//Controlar "media type", (sólo aceptará json, si se pide application/xml dará 406 not acceptable)
+//Si quiero agregar soporte XML reemplazo la anterior por esta...
+builder.Services.AddControllers(configure =>
+        {
+            configure.ReturnHttpNotAcceptable = true;
+        }
+    ).AddXmlDataContractSerializerFormatters();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
@@ -49,6 +65,20 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    //No desplegar el Stack de Error cuando es Producción
+    //OJO hay que definirlo en las Propiedades de Pruyecto
+    app.UseExceptionHandler(appBuilder =>
+    {
+        appBuilder.Run(async context =>
+        {
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsync(
+                "An unexpected fault happened. Try again later.");
+        });
+    });
 }
 
 //app.UseAuthorization();

@@ -1,9 +1,11 @@
 ﻿
+using AutoMapper;
 using DapperConsoleSample.Contracts;
-using DapperConsoleSample.Entities;
+using DapperWebApiSample.Entities;
+using DapperWebApiSample.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DepperWebApiSample.Controllers;
+namespace DapperWebApiSample.Controllers;
 
 
 /// <summary>
@@ -14,10 +16,14 @@ namespace DepperWebApiSample.Controllers;
 public class CompaniesController : ControllerBase
 {
     private readonly ICompanyRepository _companyRepo;
+    private readonly IMapper _mapper;
     
-    public CompaniesController(ICompanyRepository companyRepo)
+    public CompaniesController(ICompanyRepository companyRepo, IMapper mapper)
     {
-        _companyRepo = companyRepo;
+        _companyRepo = companyRepo??
+            throw new ArgumentNullException(nameof(companyRepo));
+        _mapper = mapper??
+            throw new ArgumentNullException(nameof(mapper));
     }
 
     /// <summary>
@@ -25,13 +31,14 @@ public class CompaniesController : ControllerBase
     /// </summary>
     /// <returns>json</returns>
     [HttpGet]
+    [HttpHead]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCompanies()
     {
         try
         {
             var companies = await _companyRepo.GetCompanies();
-            return Ok(companies);
+            return Ok(_mapper.Map<IEnumerable<CompanyWithoutEmployeesDto>>(companies));
         }
         catch (Exception ex)
         {
@@ -39,6 +46,7 @@ public class CompaniesController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+
 
     /// <summary>
     /// Obtiene el detalle de una compañía por ID
@@ -67,21 +75,22 @@ public class CompaniesController : ControllerBase
 
     /// <summary>
     /// Crea una nueva Compañía
-    /// No se requiere el ID, este es retornado en el response
     /// </summary>
     /// <param name="company"></param>
     /// <returns>json</returns>
     /// <remarks>
-    /// Retorna el item creado con el Id interno que le fue asignado.
+    /// Retorna la Compañía creada (sin empleados) con el Id interno que le fue asignado.
     /// </remarks>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateCompany(Company company)
+    public async Task<IActionResult> CreateCompany(CompanyForCreationAndUpdateDto company)
     {
         try
         {
-            var createdCompany = await _companyRepo.CreateCompany(company);
-            return CreatedAtRoute("CompanyById", new { id = createdCompany.Id }, createdCompany);
+            Company retCompany = new Entities.Company();
+            retCompany = _mapper.Map<Company>(company);
+            var createdCompany = await _companyRepo.CreateCompany(retCompany);
+            return CreatedAtRoute("CompanyById", new { id = createdCompany.Id }, _mapper.Map<CompanyWithoutEmployeesDto>(createdCompany));
         }
         catch (Exception ex)
         {
@@ -96,18 +105,21 @@ public class CompaniesController : ControllerBase
     /// </summary>
     /// <param name="company"></param>
     /// <returns></returns>
-    [HttpPut]
+    [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateCompany(Company company)
+    public async Task<IActionResult> UpdateCompany(int id, CompanyForCreationAndUpdateDto company)
     {
         try
         {
-            var dbCompany = await _companyRepo.GetCompany(company.Id);
+            Company retCompany = new Entities.Company();
+            retCompany = _mapper.Map<Company>(company);
+            retCompany.Id = id;
+            var dbCompany = await _companyRepo.GetCompany(id);
             if (dbCompany == null)
                 return NotFound();
 
-            await _companyRepo.UpdateCompany(company);
+            await _companyRepo.UpdateCompany(retCompany);
             return NoContent();
         }
         catch (Exception ex)
@@ -176,10 +188,10 @@ public class CompaniesController : ControllerBase
     /// </summary>
     /// <param name="id"></param>
     /// <returns>json</returns>
-    [HttpGet("{id}/MultipleResult")]
+    [HttpGet("{id}/employees")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetCompanyEmployeesMultipleResult(int id)
+    public async Task<IActionResult> GetCompanyWithEmployees(int id)
     {
         try
         {
@@ -201,7 +213,7 @@ public class CompaniesController : ControllerBase
     /// Obtiene todas las compañias y sus empleados.
     /// </summary>
     /// <returns>json</returns>
-    [HttpGet("MultipleMapping")]
+    [HttpGet("employees")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCompaniesEmployeesMultipleMapping()

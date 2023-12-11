@@ -1,9 +1,10 @@
-﻿using DapperConsoleSample.Entities;
+﻿using DapperWebApiSample.Entities;
 
-namespace DepperWebApiSample.Contracts
+namespace DapperWebApiSample.Contracts
 {
     public interface IEmployeeRepository
     {
         public Task<IEnumerable<Employee>> GetEmployees();
+        public Task<IEnumerable<Employee>> GetEmployeesByCompany(int companyId);
     }
 }
