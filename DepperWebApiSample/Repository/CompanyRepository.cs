@@ -61,15 +61,10 @@ public class CompanyRepository : ICompanyRepository
         using (var connection = _context.CreateConnection())
         {
             var id = await connection.QuerySingleAsync<int>(query, parameters);
-            
-            var createdCompany = new Company
-            {
-                Id = id,
-                Name = company.Name,
-                Address = company.Address,
-                Country = company.Country
-            };
+            var createdCompany = new Company();
 
+            createdCompany = _mapper.Map<Company>(company);
+            createdCompany.Id = id;
             return createdCompany;
         }
     }

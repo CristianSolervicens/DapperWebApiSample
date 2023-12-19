@@ -6,5 +6,7 @@ namespace DapperWebApiSample.Contracts
     {
         public Task<IEnumerable<Employee>> GetEmployees();
         public Task<IEnumerable<Employee>> GetEmployeesByCompany(int companyId);
+        public Task<Employee> GetEmployee(int id);
+        public Task<Employee> CreateEmployee(Employee employee);
     }
 }
